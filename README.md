@@ -39,7 +39,7 @@ The PopperASM project comprises the following components:
 # Getting Started
 To start using the PopperASM project:
 
-1. Clone the project repository: `git clone https://github.com/popper-alng/PopperASM.git`
+1. Clone the project repository: `git clone https://github.com/popper-lang/PopperASM.git`
 
 2. Ensure you have Rust and its dependencies installed on your system.
 
