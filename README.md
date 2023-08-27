@@ -28,13 +28,13 @@ The primary objectives of the PopperASM project are:
 # Components
 The PopperASM project comprises the following components:
 
-- Lexer: The lexer analyzes the source code and tokenizes it into meaningful units, such as keywords, operands, and symbols.
+- **Lexer**: The lexer analyzes the source code and tokenizes it into meaningful units, such as keywords, operands, and symbols.
 
-- Parser: The parser processes the tokens produced by the lexer and constructs an Abstract Syntax Tree (AST) that represents the syntactic structure of the code.
+- **Parser**: The parser processes the tokens produced by the lexer and constructs an Abstract Syntax Tree (AST) that represents the syntactic structure of the code.
 
-- Abstract Syntax Tree (AST): The AST is a hierarchical representation of the code's structure, capturing the relationships between different elements.
+- **Abstract Syntax Tree (AST)**: The AST is a hierarchical representation of the code's structure, capturing the relationships between different elements.
 
-- Machine Code Generator: Using the information in the AST, the machine code generator produces binary code that can be executed on the PopperCPU.
+- **Machine Code Generator**: Using the information in the AST, the machine code generator produces binary code that can be executed on the PopperCPU.
 
 # Getting Started
 To start using the PopperASM project:
