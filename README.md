@@ -46,11 +46,11 @@ To start using the PopperASM project:
 3. Review the documentation in the docs directory to understand how the lexer, parser, and AST work together.
 
 # Usage
-1. Write your PopperASM code in a .popasm file using your preferred text editor.
+1. Write your PopperASM code in a `.popasm` file using your preferred text editor.
 
 2. Open a terminal and navigate to the directory containing the Rust source files.
 
-3. Build and run the PopperASM assembler on your code: cargo run input.popasm 
+3. Build and run the PopperASM assembler on your code: `cargo run input.popasm` 
 
 The assembler processes the input code, generates the AST, and printed it into json
 
