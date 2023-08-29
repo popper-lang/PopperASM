@@ -20,8 +20,13 @@ impl Error {
     pub fn report(&self, source: &str) {
 
         let extract = self.span.extract_from_str(source);
+        let marker = self.span.make_marker(source);
+        let line = source.lines().nth(self.span.find_line(source) - 1).unwrap();
 
-        println!("`{:?}`: {}", extract, self.message);
+
+        println!("Error:[{:?} {} `{:?}`", self.span, self.message, extract);
+        println!("Source: {}", line);
+        println!("{}", marker);
     }
 }
 
@@ -79,13 +84,15 @@ impl Parser {
 
     fn parse_add(&mut self) -> Result<Command, Error> {
         let register = self.parse_memory_fetching()?;
-        let _  = self.expect(TokenKind::Comma);
+        let _  = self.expect(TokenKind::Comma)?;
         let expr = self.parse_expr()?;
+
         Ok(Command::Add(Add(register, expr)))
     }
 
     fn parse_sub(&mut self) -> Result<Command, Error> {
         let register = self.parse_memory_fetching()?;
+        let _  = self.expect(TokenKind::Comma)?;
         let expr = self.parse_expr()?;
         Ok(Command::Sub(Sub(register, expr)))
     }
@@ -97,6 +104,7 @@ impl Parser {
 
     fn parse_div(&mut self) -> Result<Command, Error> {
         let register = self.parse_memory_fetching()?;
+        let _  = self.expect(TokenKind::Comma)?;
         let expr = self.parse_expr()?;
         Ok(Command::Div(Div(register, expr)))
     }

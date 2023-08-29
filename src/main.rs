@@ -1,6 +1,6 @@
 use std::env::args;
-use PopperASM::lexer::Lexer;
-use PopperASM::parser::Parser;
+use popper_asm::lexer::Lexer;
+use popper_asm::parser::Parser;
 
 fn main() {
     let args = args();

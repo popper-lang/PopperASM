@@ -32,4 +32,33 @@ impl Span {
     pub fn extract_from_str<'a>(&self, string: &'a str) -> &'a str {
         &string[self.start..self.end]
     }
+
+    pub fn make_marker(&self, string: &str) -> String {
+        let mut marker = String::new();
+        for _ in 0..self.start {
+            marker.push(' ');
+        }
+        for _ in self.start..self.end {
+            marker.push('^');
+        }
+
+        for _ in self.end..string.len() {
+            marker.push(' ');
+        }
+        marker
+    }
+
+    pub fn find_line(&self, string: &str) -> usize {
+        let mut line = 1;
+        for (i, c) in string.chars().enumerate() {
+            if i == self.start {
+                break;
+            }
+            if c == '\n' {
+                line += 1;
+            }
+        }
+
+        line
+    }
 }

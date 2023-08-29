@@ -43,15 +43,17 @@ impl MachineCodeInstruction {
         let label_bin = add_zero(format!("{:b}", self.label), 4);
         let instr_bin = add_zero(format!("{:b}", self.instr), 7);
         let operand1_type_bin = add_zero(format!("{:b}", self.operand1_type), 4);
-        let mut operand1_bin = String::new();
-        for byte in &self.operand1 {
-            operand1_bin.push_str(&add_zero(format!("{:b} ", byte), 9));
-        }
+        let operand1_bin = self.operand1
+            .iter()
+            .map(|x| add_zero(format!("{:b}", x), 8))
+            .collect::<Vec<String>>()
+            .join(" ");
         let operand2_type_bin = add_zero(format!("{:b}", self.operand2_type), 4);
-        let mut operand2_bin = String::new();
-        for byte in &self.operand2 {
-            operand2_bin.push_str(&add_zero(format!("{:b} ", byte), 9));
-        }
+        let operand2_bin = self.operand2
+            .iter()
+            .map(|x| add_zero(format!("{:b}", x), 8))
+            .collect::<Vec<String>>()
+            .join(" ");
         format!("{} {} {} {} {} {}", label_bin, instr_bin, operand1_type_bin, operand1_bin, operand2_type_bin, operand2_bin)
     }
 
@@ -59,15 +61,17 @@ impl MachineCodeInstruction {
         let label_hex = add_zero(format!("{:x}", self.label), 4);
         let instr_hex = add_zero(format!("{:x}", self.instr), 4);
         let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 4);
-        let mut operand1_hex = String::new();
-        for byte in &self.operand1 {
-            operand1_hex.push_str(&add_zero(format!("{:x} ", byte), 5));
-        }
+        let operand1_hex = self.operand2
+            .iter()
+            .map(|x| add_zero(format!("{:x}", x), 4))
+            .collect::<Vec<String>>()
+            .join(" ");
         let operand2_type_hex = add_zero(format!("{:x}", self.operand2_type), 4);
-        let mut operand2_hex = String::new();
-        for byte in &self.operand2 {
-            operand2_hex.push_str(&add_zero(format!("{:x} ", byte), 5));
-        }
+        let operand2_hex = self.operand2
+            .iter()
+            .map(|x| add_zero(format!("{:x}", x), 4))
+            .collect::<Vec<String>>()
+            .join(" ");
         format!("{} {} {} {} {} {}", label_hex, instr_hex, operand1_type_hex, operand1_hex, operand2_type_hex, operand2_hex)
     }
 }
@@ -247,13 +251,13 @@ mod tests {
     #[test]
     fn test_binary_string() {
         let instr = MachineCodeInstruction::new(0, MOV, REG, [0x10, 0x32, 0x45, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
-        assert_eq!(instr.binary_string(), "0000 0010001 0001 00010000 00110010 01000101 00000000  0010 00000001 00000000 00000000 00000000 ");
+        assert_eq!(instr.binary_string(), "0000 0010001 0001 00010000 00110010 01000101 00000000 0010 00000001 00000000 00000000 00000000");
     }
 
     #[test]
     fn test_hex_string() {
         let instr = MachineCodeInstruction::new(0, MOV, REG, [0xA, 0x0, 0x0, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
-        assert_eq!(instr.hex_string().trim(), "0000 0011 0001 000a 0000 0000 0000  0002 0001 0000 0000 0000");
+        assert_eq!(instr.hex_string(), "0000 0011 0001 0001 0000 0000 0000 0002 0001 0000 0000 0000");
     }
 
     #[test]
@@ -265,7 +269,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(format!("{:b}", instrs), "0000 0010001 0001 00000001 00000000 00000000 00000000  0010 00000010 00000000 00000000 00000000 \n0000 0010010 0001 00000011 00000000 00000000 00000000  0010 00001001 00000000 00000000 00000000 \n");
+        assert_eq!(format!("{:b}", instrs), "0000 0010001 0001 00000001 00000000 00000000 00000000 0010 00000010 00000000 00000000 00000000\n0000 0010010 0001 00000011 00000000 00000000 00000000 0010 00001001 00000000 00000000 00000000\n");
     }
 
     #[test]
@@ -277,7 +281,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(format!("{:x}", instrs), "0000 0011 0001 0001 0000 0000 0000  0002 0002 0000 0000 0000 \n0000 0011 0001 0003 0000 0000 0000  0002 0009 0000 0000 0000 \n");
+        assert_eq!(format!("{:x}", instrs), "0000 0011 0001 0002 0000 0000 0000 0002 0002 0000 0000 0000\n0000 0011 0001 0009 0000 0000 0000 0002 0009 0000 0000 0000\n");
     }
     #[test]
     fn test_mov() {
