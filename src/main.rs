@@ -1,17 +1,18 @@
 use std::env::args;
 use popper_asm::lexer::Lexer;
 use popper_asm::parser::Parser;
+use popper_asm::machine_code::{MachineCodeCompiler, MachineCodeInstruction};
 
 fn main() {
     let args = args();
     let source = r#"
             main:
                 mov r1, 3
-                mov r2, 9
+                mov r2, 4
                 call $sum
+
             sum:
                 add r1, r2
-
         "#;
 
     let mut lexer = Lexer::new(source);
@@ -25,7 +26,11 @@ fn main() {
 
     match program {
         Ok(res) => {
-            println!("{:#?}", res)
+            let mut c = MachineCodeCompiler::new(res);
+
+            let m = c.compile();
+            println!("Hex:\n{:x}", m);
+            println!("Bin:\n{:b}", m);
         }
         Err(err) => {
             err.report(source);

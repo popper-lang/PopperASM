@@ -189,7 +189,15 @@ impl MachineCodeCompiler {
                 },
                 Command::Call(call) => {
                     let operand1_type = INT;
-                    let operand1 = self.int_to_bytes(*self.labels.get(&call.0).unwrap() as i32);
+                    let operand1 = if self.labels.contains_key(call.0.as_str()) {
+                        self.int_to_bytes(*self.labels.get(&call.0).unwrap() as i32)
+                    } else {
+
+                        let n = *self.labels.iter().last().map(|x| x.1).unwrap_or(&0) + 1;
+                        self.labels.insert(call.0, n);
+                        self.int_to_bytes(n as i32)
+
+                    };
 
                     self.machine_code.push(MachineCodeInstruction::new(self.current_label, CALL, operand1_type, operand1, VOID, Default::default()));
                 },
@@ -200,10 +208,13 @@ impl MachineCodeCompiler {
                     self.machine_code.push(MachineCodeInstruction::new(self.current_label, ALLOW, operand1_type, operand1, operand2_type, operand2));
                 },
                 Command::Label(label) => {
-                    let last = self.labels.iter().last().map(|x| x.1).unwrap_or(&0);
-                    let id = last + 1;
-                    self.labels.insert(label.name, id.clone());
-                    self.current_label = id;
+                    let mut last = *self.labels.iter().last().map(|x| x.1).unwrap_or(&0);
+                    if ! self.labels.contains_key(label.name.as_str()) {
+                        last += 1;
+                        self.labels.insert(label.name, last);
+                    }
+                    self.current_label = last;
+                    dbg!(self.current_label);
                     self.command_compiler(label.program.commands);
                 }
             }
