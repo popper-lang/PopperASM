@@ -214,7 +214,6 @@ impl MachineCodeCompiler {
                         self.labels.insert(label.name, last);
                     }
                     self.current_label = last;
-                    dbg!(self.current_label);
                     self.command_compiler(label.program.commands);
                 }
             }
