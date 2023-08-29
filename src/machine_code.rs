@@ -56,14 +56,14 @@ impl MachineCodeInstruction {
     }
 
     pub fn hex_string(&self) -> String {
-        let label_hex = add_zero(format!("{:x}", self.label), 2);
-        let instr_hex = add_zero(format!("{:x}", self.instr), 2);
-        let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 4);
+        let label_hex = add_zero(format!("{:x}", self.label), 5);
+        let instr_hex = add_zero(format!("{:x}", self.instr), 5);
+        let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 5);
         let mut operand1_hex = String::new();
         for byte in &self.operand1 {
             operand1_hex.push_str(&add_zero(format!("{:x} ", byte), 5));
         }
-        let operand2_type_hex = add_zero(format!("{:x}", self.operand2_type), 4);
+        let operand2_type_hex = add_zero(format!("{:x}", self.operand2_type), 5);
         let mut operand2_hex = String::new();
         for byte in &self.operand2 {
             operand2_hex.push_str(&add_zero(format!("{:x} ", byte), 5));
