@@ -40,7 +40,7 @@ impl MachineCodeInstruction {
     }
 
     pub fn binary_string(&self) -> String {
-        let label_bin = add_zero(format!("{:b}", self.label), 8);
+        let label_bin = add_zero(format!("{:b}", self.label), 4);
         let instr_bin = add_zero(format!("{:b}", self.instr), 7);
         let operand1_type_bin = add_zero(format!("{:b}", self.operand1_type), 4);
         let mut operand1_bin = String::new();
@@ -56,14 +56,14 @@ impl MachineCodeInstruction {
     }
 
     pub fn hex_string(&self) -> String {
-        let label_hex = add_zero(format!("{:x}", self.label), 5);
-        let instr_hex = add_zero(format!("{:x}", self.instr), 5);
-        let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 5);
+        let label_hex = add_zero(format!("{:x}", self.label), 4);
+        let instr_hex = add_zero(format!("{:x}", self.instr), 4);
+        let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 4);
         let mut operand1_hex = String::new();
         for byte in &self.operand1 {
             operand1_hex.push_str(&add_zero(format!("{:x} ", byte), 5));
         }
-        let operand2_type_hex = add_zero(format!("{:x}", self.operand2_type), 5);
+        let operand2_type_hex = add_zero(format!("{:x}", self.operand2_type), 4);
         let mut operand2_hex = String::new();
         for byte in &self.operand2 {
             operand2_hex.push_str(&add_zero(format!("{:x} ", byte), 5));
@@ -246,13 +246,13 @@ mod tests {
     #[test]
     fn test_binary_string() {
         let instr = MachineCodeInstruction::new(0, MOV, REG, [0x1, 0x0, 0x0, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
-        assert_eq!(instr.binary_string(), "00000000 0010001 0001 0001 0000 0000 0000  0010 0001 0000 0000 0000 ");
+        assert_eq!(instr.binary_string(), "0000 0010001 0001 0001 0000 0000 0000  0010 0001 0000 0000 0000 ");
     }
 
     #[test]
     fn test_hex_string() {
         let instr = MachineCodeInstruction::new(0, MOV, REG, [0xA, 0x0, 0x0, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
-        assert_eq!(instr.hex_string().trim(), "00 11 0001 000a 0000 0000 0000  0002 0001 0000 0000 0000");
+        assert_eq!(instr.hex_string().trim(), "0000 0011 0001 000a 0000 0000 0000  0002 0001 0000 0000 0000");
     }
 
     #[test]
@@ -264,7 +264,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(format!("{:b}", instrs), "00000000 0010001 0001 0001 0000 0000 0000  0010 0010 0000 0000 0000 \n00000000 0010010 0001 0011 0000 0000 0000  0010 1001 0000 0000 0000 \n");
+        assert_eq!(format!("{:b}", instrs), "0000 0010001 0001 0001 0000 0000 0000  0010 0010 0000 0000 0000 \n0000 0010010 0001 0011 0000 0000 0000  0010 1001 0000 0000 0000 \n");
     }
 
     #[test]
@@ -276,7 +276,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(format!("{:x}", instrs), "00 11 0001 0001 0000 0000 0000  0002 0002 0000 0000 0000 \n00 11 0001 0003 0000 0000 0000  0002 0009 0000 0000 0000 \n");
+        assert_eq!(format!("{:x}", instrs), "0000 0011 0001 0001 0000 0000 0000  0002 0002 0000 0000 0000 \n0000 0011 0001 0003 0000 0000 0000  0002 0009 0000 0000 0000 \n");
     }
     #[test]
     fn test_mov() {
