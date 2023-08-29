@@ -183,7 +183,7 @@ impl MachineCodeCompiler {
                 },
                 Command::Call(call) => {
                     let operand1_type = INT;
-                    let operand1 = self.int_to_bytes(self.labels.get(&call.0).unwrap().clone() as i32);
+                    let operand1 = self.int_to_bytes(*self.labels.get(&call.0).unwrap() as i32);
 
                     self.machine_code.push(MachineCodeInstruction::new(self.current_label, CALL, operand1_type, operand1, VOID, Default::default()));
                 },
@@ -260,11 +260,11 @@ mod tests {
         let instrs = MachineCode::new(
             vec![
                 MachineCodeInstruction::new(0, MOV, REG, [0x1, 0x0, 0x0, 0x0], INT, [0x2, 0x0, 0x0, 0x0]),
-                MachineCodeInstruction::new(0, MOV, REG, [0x3, 0x0, 0x0, 0x0], INT, [0x9, 0x0, 0x0, 0x0]),
+                MachineCodeInstruction::new(0, ADD, REG, [0x3, 0x0, 0x0, 0x0], INT, [0x9, 0x0, 0x0, 0x0]),
             ]
         );
 
-        assert_eq!(format!("{:b}", instrs), "00000000 0010001 0001 0001 0000 0000 0000  0010 0010 0000 0000 0000 \n00000000 0010001 0001 0011 0000 0000 0000  0010 1001 0000 0000 0000 \n");
+        assert_eq!(format!("{:b}", instrs), "00000000 0010001 0001 0001 0000 0000 0000  0010 0010 0000 0000 0000 \n00000000 0010010 0001 0011 0000 0000 0000  0010 1001 0000 0000 0000 \n");
     }
 
     #[test]
@@ -282,8 +282,17 @@ mod tests {
     fn test_mov() {
         let mut compiler = MachineCodeCompiler::new(Program::new(vec![Command::Mov(Mov(MemoryFetching::Register(Register::R1), Expr::Int(1)))]));
         let machine_code = compiler.compile();
-        assert_eq!(compiler.machine_code.code, vec![
+        assert_eq!(machine_code.code, vec![
             MachineCodeInstruction::new(0, MOV, REG, [0x1, 0x0, 0x0, 0x0], INT, [0x1, 0x0, 0x0, 0x0])
+        ]);
+    }
+
+    #[test]
+    fn test_pop() {
+        let mut compiler = MachineCodeCompiler::new(Program::new(vec![Command::Pop(Pop(MemoryFetching::Register(Register::R1)))]));
+        let machine_code = compiler.compile();
+        assert_eq!(machine_code.code, vec![
+            MachineCodeInstruction::new(0, POP, REG, [0x1, 0x0, 0x0, 0x0], VOID, Default::default())
         ]);
     }
 

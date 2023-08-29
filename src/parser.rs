@@ -246,21 +246,5 @@ impl Parser {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_parser() {
 
-        let source = r#"
-            main:
-                mov r1, 3
-                mov r2, 9
-                call $sum
-            sum:
-                add r1, r2
-
-        "#;
-    }
-}
 
