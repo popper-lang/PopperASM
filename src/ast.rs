@@ -14,7 +14,7 @@ pub enum Command {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-#[repr(u8)]
+#[repr(u32)]
 pub enum Register {
     R1  = 0x01,
     R2  = 0x02,

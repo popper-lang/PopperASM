@@ -45,12 +45,12 @@ impl MachineCodeInstruction {
         let operand1_type_bin = add_zero(format!("{:b}", self.operand1_type), 4);
         let mut operand1_bin = String::new();
         for byte in &self.operand1 {
-            operand1_bin.push_str(&add_zero(format!("{:b} ", byte), 5));
+            operand1_bin.push_str(&add_zero(format!("{:b} ", byte), 9));
         }
         let operand2_type_bin = add_zero(format!("{:b}", self.operand2_type), 4);
         let mut operand2_bin = String::new();
         for byte in &self.operand2 {
-            operand2_bin.push_str(&add_zero(format!("{:b} ", byte), 5));
+            operand2_bin.push_str(&add_zero(format!("{:b} ", byte), 9));
         }
         format!("{} {} {} {} {} {}", label_bin, instr_bin, operand1_type_bin, operand1_bin, operand2_type_bin, operand2_bin)
     }
@@ -235,7 +235,8 @@ impl MachineCodeCompiler {
 }
 
 fn add_zero(string: String, size: usize) -> String {
-    let added_zeros = "0".repeat(size - string.len());
+
+    let added_zeros = if size.clone() < string.len()  { "".to_string() } else { "0".repeat(size - string.len())};
     format!("{}{}", added_zeros, string)
 }
 
@@ -245,8 +246,8 @@ mod tests {
 
     #[test]
     fn test_binary_string() {
-        let instr = MachineCodeInstruction::new(0, MOV, REG, [0x1, 0x0, 0x0, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
-        assert_eq!(instr.binary_string(), "0000 0010001 0001 0001 0000 0000 0000  0010 0001 0000 0000 0000 ");
+        let instr = MachineCodeInstruction::new(0, MOV, REG, [0x10, 0x32, 0x45, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
+        assert_eq!(instr.binary_string(), "0000 0010001 0001 00010000 00110010 01000101 00000000  0010 00000001 00000000 00000000 00000000 ");
     }
 
     #[test]
@@ -264,7 +265,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(format!("{:b}", instrs), "0000 0010001 0001 0001 0000 0000 0000  0010 0010 0000 0000 0000 \n0000 0010010 0001 0011 0000 0000 0000  0010 1001 0000 0000 0000 \n");
+        assert_eq!(format!("{:b}", instrs), "0000 0010001 0001 00000001 00000000 00000000 00000000  0010 00000010 00000000 00000000 00000000 \n0000 0010010 0001 00000011 00000000 00000000 00000000  0010 00001001 00000000 00000000 00000000 \n");
     }
 
     #[test]
