@@ -61,12 +61,14 @@ impl MachineCodeInstruction {
         let label_hex = add_zero(format!("{:x}", self.label), 4);
         let instr_hex = add_zero(format!("{:x}", self.instr), 4);
         let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 4);
-        let operand1_hex = self.operand2
+
+        let operand1_hex = self.operand1
             .iter()
             .map(|x| add_zero(format!("{:x}", x), 4))
             .collect::<Vec<String>>()
             .join(" ");
         let operand2_type_hex = add_zero(format!("{:x}", self.operand2_type), 4);
+
         let operand2_hex = self.operand2
             .iter()
             .map(|x| add_zero(format!("{:x}", x), 4))
@@ -256,8 +258,8 @@ mod tests {
 
     #[test]
     fn test_hex_string() {
-        let instr = MachineCodeInstruction::new(0, MOV, REG, [0xA, 0x0, 0x0, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
-        assert_eq!(instr.hex_string(), "0000 0011 0001 0001 0000 0000 0000 0002 0001 0000 0000 0000");
+        let instr = MachineCodeInstruction::new(0, MOV, REG, [0xC8, 0xB, 0xA2, 0xB3], INT, [0x1, 0x0, 0x0, 0x0]);
+        assert_eq!(instr.hex_string(), "0000 0011 0001 00c8 000b 00a2 00b3 0002 0001 0000 0000 0000");
     }
 
     #[test]
@@ -281,7 +283,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(format!("{:x}", instrs), "0000 0011 0001 0002 0000 0000 0000 0002 0002 0000 0000 0000\n0000 0011 0001 0009 0000 0000 0000 0002 0009 0000 0000 0000\n");
+        assert_eq!(format!("{:x}", instrs), "0000 0011 0001 0001 0000 0000 0000 0002 0002 0000 0000 0000\n0000 0011 0001 0003 0000 0000 0000 0002 0009 0000 0000 0000\n");
     }
     #[test]
     fn test_mov() {
