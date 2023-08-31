@@ -15,11 +15,12 @@ pub static DIV: u8 = 0x15;
 pub static POP: u8 = 0x16;
 pub static CALL: u8 = 0x17;
 pub static ALLOW: u8 = 0x18;
+pub static NOP: u8 = 0x19;
 
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MachineCodeInstruction {
-    pub label: u8,
+    pub label: [u8; 4],
     pub instr: u8,
     pub operand1_type: u8,
     pub operand1: [u8; 4],
@@ -28,7 +29,7 @@ pub struct MachineCodeInstruction {
 }
 
 impl MachineCodeInstruction {
-    pub fn new(label: u8, instr: u8, operand1_type: u8, operand1: [u8; 4], operand2_type: u8, operand2: [u8; 4]) -> Self {
+    pub fn new(label: [u8; 4], instr: u8, operand1_type: u8, operand1: [u8; 4], operand2_type: u8, operand2: [u8; 4]) -> Self {
         Self {
             label,
             instr,
@@ -40,7 +41,11 @@ impl MachineCodeInstruction {
     }
 
     pub fn binary_string(&self) -> String {
-        let label_bin = add_zero(format!("{:b}", self.label), 4);
+        let instr_addr_bin = self.label
+            .iter()
+            .map(|x| add_zero(format!("{:b}", x), 8))
+            .collect::<Vec<String>>()
+            .join(" ");
         let instr_bin = add_zero(format!("{:b}", self.instr), 7);
         let operand1_type_bin = add_zero(format!("{:b}", self.operand1_type), 4);
         let operand1_bin = self.operand1
@@ -54,11 +59,16 @@ impl MachineCodeInstruction {
             .map(|x| add_zero(format!("{:b}", x), 8))
             .collect::<Vec<String>>()
             .join(" ");
-        format!("{} {} {} {} {} {}", label_bin, instr_bin, operand1_type_bin, operand1_bin, operand2_type_bin, operand2_bin)
+
+        format!("{} {} {} {} {} {}", instr_addr_bin, instr_bin, operand1_type_bin, operand1_bin, operand2_type_bin, operand2_bin)
     }
 
     pub fn hex_string(&self) -> String {
-        let label_hex = add_zero(format!("{:x}", self.label), 4);
+        let instr_addr_mem_hex = self.label
+            .iter()
+            .map(|x| add_zero(format!("{:x}", x), 4))
+            .collect::<Vec<String>>()
+            .join(" ");
         let instr_hex = add_zero(format!("{:x}", self.instr), 4);
         let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 4);
 
@@ -74,7 +84,22 @@ impl MachineCodeInstruction {
             .map(|x| add_zero(format!("{:x}", x), 4))
             .collect::<Vec<String>>()
             .join(" ");
-        format!("{} {} {} {} {} {}", label_hex, instr_hex, operand1_type_hex, operand1_hex, operand2_type_hex, operand2_hex)
+        format!("{} {} {} {} {} {}", instr_addr_mem_hex, instr_hex, operand1_type_hex, operand1_hex, operand2_type_hex, operand2_hex)
+    }
+
+    pub fn to_bytecode(&self) -> Vec<u8> {
+        let mut bytecode = vec![];
+        bytecode.extend(self.label);
+        bytecode.extend(self.instr.to_le_bytes());
+        bytecode.extend(self.operand1_type.to_le_bytes());
+        bytecode.extend(self.operand1);
+        bytecode.extend(self.operand2_type.to_le_bytes());
+        bytecode.extend(self.operand2);
+        bytecode
+    }
+
+    pub fn from_bytecode(bytecode: Vec<u8>) -> Self {
+        todo!()
     }
 }
 
@@ -99,6 +124,14 @@ impl MachineCode {
     pub fn extend<I: IntoIterator<Item = MachineCodeInstruction>>(&mut self, instrs: I) {
         self.code.extend(instrs);
     }
+
+    pub fn last_mut(&mut self) -> Option<&mut MachineCodeInstruction> {
+        self.code.last_mut()
+    }
+
+    pub fn contains_addr_instr(&self, addr: u32) -> bool {
+        self.code.iter().filter(|x| u32::from_le_bytes(x.label) == addr).count() != 0
+    }
 }
 
 impl Binary for MachineCode {
@@ -120,7 +153,7 @@ impl LowerHex for MachineCode {
 
         for byte in &self.code {
             string.push_str(&byte.hex_string());
-            string.push_str("\n");
+            string.push('\n');
         }
 
         write!(f, "{}", string)
@@ -131,8 +164,9 @@ impl LowerHex for MachineCode {
 pub struct MachineCodeCompiler {
     pub program: Program,
     pub machine_code: MachineCode,
-    labels: HashMap<String, u8>,
-    current_label: u8
+    labels: HashMap<String, u32>,
+    must_have: HashMap<String, u32>,
+    current_label: u32,
 }
 
 impl MachineCodeCompiler {
@@ -141,83 +175,87 @@ impl MachineCodeCompiler {
             program,
             machine_code: MachineCode::new(vec![]),
             labels: HashMap::new(),
-            current_label: 0
+            must_have: HashMap::new(),
+            current_label: 1,
         }
     }
 
     pub fn compile(&mut self) -> MachineCode {
-        self.command_compiler(self.program.commands.clone());
+
+        self.setup_labels(self.program.labels.clone());
+        self.labels_compiler(self.program.labels.clone());
+        self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(0), NOP, VOID, Default::default(), VOID, Default::default()));
         self.machine_code.clone()
     }
 
+    pub fn setup_labels(&mut self, labels: Vec<Label>) {
+        labels.iter().fold(1, move |acc, x| {
+            self.labels.insert(x.name.clone(), acc);
+            acc + x.program.len() as u32
+        });
+
+    }
+
+    pub fn labels_compiler(&mut self, labels: Vec<Label>) {
+        labels.iter().for_each(|x| {
+            self.current_label =  self.labels.get(&x.name).cloned().unwrap();
+            self.command_compiler(x.program.clone());
+
+        })
+    }
+
+
     pub fn command_compiler(&mut self, commands: Vec<Command>)  {
+
         for cmd in commands.clone() {
             match cmd {
                 Command::Mov(mov) => {
                     let (operand1_type, operand1) = self.memory_to_bytes(mov.0);
                     let (operand2_type, operand2) = self.expr_to_bytes(mov.1);
 
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, MOV, operand1_type, operand1, operand2_type, operand2));
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), MOV, operand1_type, operand1, operand2_type, operand2));
                 },
                 Command::Add(add) => {
                     let (operand1_type, operand1) = self.memory_to_bytes(add.0);
                     let (operand2_type, operand2) = self.expr_to_bytes(add.1);
-
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, ADD, operand1_type, operand1, operand2_type, operand2));
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), ADD, operand1_type, operand1, operand2_type, operand2));
                 },
                 Command::Sub(sub) => {
                     let (operand1_type, operand1) = self.memory_to_bytes(sub.0);
                     let (operand2_type, operand2) = self.expr_to_bytes(sub.1);
 
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, SUB, operand1_type, operand1, operand2_type, operand2));
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), SUB, operand1_type, operand1, operand2_type, operand2));
                 },
                 Command::Mul(mul) => {
                     let (operand1_type, operand1) = self.memory_to_bytes(mul.0);
 
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, MUL, operand1_type, operand1, VOID, Default::default()));
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), MUL, operand1_type, operand1, VOID, Default::default()));
                 },
                 Command::Div(div) => {
                     let (operand1_type, operand1) = self.memory_to_bytes(div.0);
                     let (operand2_type, operand2) = self.expr_to_bytes(div.1);
 
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, DIV, operand1_type, operand1, operand2_type, operand2));
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), DIV, operand1_type, operand1, operand2_type, operand2));
                 },
                 Command::Pop(pop) => {
                     let (operand1_type, operand1) = self.memory_to_bytes(pop.0);
 
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, POP, operand1_type, operand1, VOID, Default::default()));
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), POP, operand1_type, operand1, VOID, Default::default()));
                 },
                 Command::Call(call) => {
-                    let operand1_type = INT;
-                    let operand1 = if self.labels.contains_key(call.0.as_str()) {
-                        self.int_to_bytes(*self.labels.get(&call.0).unwrap() as i32)
-                    } else {
-
-                        let n = *self.labels.iter().last().map(|x| x.1).unwrap_or(&0) + 1;
-                        self.labels.insert(call.0, n);
-                        self.int_to_bytes(n as i32)
-
-                    };
-
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, CALL, operand1_type, operand1, VOID, Default::default()));
+                    let n = self.int_to_bytes(self.labels.get(&call.0).cloned().unwrap());
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), CALL, INT, n, VOID, Default::default()));
                 },
                 Command::Allow(allow) => {
                     let (operand1_type, operand1) = self.expr_to_bytes(allow.0);
                     let (operand2_type, operand2) = self.expr_to_bytes(allow.1);
 
-                    self.machine_code.push(MachineCodeInstruction::new(self.current_label, ALLOW, operand1_type, operand1, operand2_type, operand2));
-                },
-                Command::Label(label) => {
-                    let mut last = *self.labels.iter().last().map(|x| x.1).unwrap_or(&0);
-                    if ! self.labels.contains_key(label.name.as_str()) {
-                        last += 1;
-                        self.labels.insert(label.name, last);
-                    }
-                    self.current_label = last;
-                    self.command_compiler(label.program.commands);
+                    self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), ALLOW, operand1_type, operand1, operand2_type, operand2));
                 }
             }
         }
+
+
     }
 
     pub fn register_to_bytes(&self, reg: Register) -> [u8; 4] {
@@ -226,7 +264,7 @@ impl MachineCodeCompiler {
         list
     }
 
-    pub fn int_to_bytes(&self, int: i32) -> [u8; 4] {
+    pub fn int_to_bytes(&self, int: u32) -> [u8; 4] {
         let mut list: [u8; 4] = Default::default();
         list.copy_from_slice(&int.to_le_bytes());
         list
@@ -235,25 +273,29 @@ impl MachineCodeCompiler {
     pub fn memory_to_bytes(&self, mem: MemoryFetching) -> (u8, [u8; 4]) {
         match mem {
             MemoryFetching::Register(reg) => (REG, self.register_to_bytes(reg)),
-            MemoryFetching::Addr(mem) => (MEM, self.int_to_bytes(mem as i32)),
+            MemoryFetching::Addr(mem) => (MEM, self.int_to_bytes(mem as u32)),
         }
     }
 
     pub fn expr_to_bytes(&self, expr: Expr) -> (u8, [u8; 4])  {
         match expr {
-            Expr::Int(int) => (INT, self.int_to_bytes(int)),
-            Expr::Label(label) => (LABEL, self.int_to_bytes(self.labels.get(&label).unwrap().clone() as i32)),
+            Expr::Int(int) => (INT, self.int_to_bytes(int as u32)),
+            Expr::Label(label) => (LABEL, self.int_to_bytes(self.labels.get(&label).unwrap().clone())),
             Expr::Memory(mem) => self.memory_to_bytes(mem),
         }
     }
 
-
 }
+
 
 fn add_zero(string: String, size: usize) -> String {
 
     let added_zeros = if size.clone() < string.len()  { "".to_string() } else { "0".repeat(size - string.len())};
     format!("{}{}", added_zeros, string)
+}
+
+fn sum_ascii_letter(string: String) -> u32 {
+    string.chars().fold(0, |acc, x| acc + x as u32)
 }
 
 #[cfg(test)]
@@ -295,6 +337,20 @@ mod tests {
 
         assert_eq!(format!("{:x}", instrs), "0000 0011 0001 0001 0000 0000 0000 0002 0002 0000 0000 0000\n0000 0011 0001 0003 0000 0000 0000 0002 0009 0000 0000 0000\n");
     }
+
+    #[test]
+    fn test_to_bytecode() {
+        let instr = MachineCodeInstruction::new(0, MOV, REG, [0x1, 0x0, 0x0, 0x0], INT, [0x1, 0x0, 0x0, 0x0]);
+
+        assert_eq!(
+            instr.to_bytecode(),
+            vec![0x0, MOV, REG, 0x1, 0x0, 0x0, 0x0, INT, 0x1, 0x0, 0x0, 0x0]
+        );
+    }
+
+
+
+
     #[test]
     fn test_mov() {
         let mut compiler = MachineCodeCompiler::new(Program::new(vec![Command::Mov(Mov(MemoryFetching::Register(Register::R1), Expr::Int(1)))]));

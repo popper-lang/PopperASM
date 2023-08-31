@@ -1,0 +1,6 @@
+main:
+	mov r1, 1
+	mov r2, 2
+	call $sum
+sum:
+	add r1, r2

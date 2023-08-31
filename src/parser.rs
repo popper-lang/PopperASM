@@ -50,7 +50,7 @@ impl Parser {
         let mut cmds = vec![];
 
         while ! self.is_at_end() {
-            let cmd = self.parse_command()?;
+            let cmd = self.parse_label()?;
             cmds.push(cmd);
         }
 
@@ -70,7 +70,7 @@ impl Parser {
             "pop" => self.parse_pop(),
             "call" => self.parse_call(),
             "allow" => self.parse_allow(),
-            e => self.parse_label(e.to_string())
+            _ => Err(Error::new("unexpected command".to_string(), command.span))
         };
         command
     }
@@ -165,7 +165,8 @@ impl Parser {
         }
     }
 
-    fn parse_label(&mut self, name: String) -> Result<Command, Error> {
+    fn parse_label(&mut self) -> Result<Label, Error> {
+        let ident = self.expect(TokenKind::Ident)?;
         let _ = self.expect(TokenKind::Colon);
         let mut instrs = vec![];
 
@@ -173,11 +174,16 @@ impl Parser {
             self.ignore_newlines();
             let command = self.parse_command()?;
             instrs.push(command);
+            let mut cloned_parser = self.clone();
+
+            if cloned_parser.parse_label().is_ok() {
+                break;
+            }
 
 
         }
 
-        Ok(Command::Label(Label::new(name, Program::new(instrs))))
+        Ok(Label::new(ident.lexeme,  instrs))
 
     }
 

@@ -9,8 +9,7 @@ pub enum Command {
     Div(Div),
     Pop(Pop),
     Call(Call),
-    Allow(Allow),
-    Label(Label),
+    Allow(Allow)
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -84,11 +83,11 @@ pub struct Allow(pub Expr, pub Expr);
 #[derive(Clone, Debug, PartialEq)]
 pub struct Label {
     pub name: String,
-    pub program: Program,
+    pub program: Vec<Command>,
 }
 
 impl Label {
-    pub fn new(name: String, program: Program) -> Self {
+    pub fn new(name: String, program: Vec<Command>) -> Self {
         Self { name, program }
     }
 
@@ -96,12 +95,12 @@ impl Label {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Program {
-    pub commands: Vec<Command>,
+    pub labels: Vec<Label>,
 }
 
 impl Program {
-    pub fn new(commands: Vec<Command>) -> Self {
-        Self { commands }
+    pub fn new(labels: Vec<Label>) -> Self {
+        Self { labels }
     }
 }
 
