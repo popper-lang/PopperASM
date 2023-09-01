@@ -107,7 +107,7 @@ impl<'a> Lexer<'a> {
 
         self.advance();
 
-        let lexeme = self.source[self.start + 1..self.current - 1].to_string();
+        let _lexeme = self.source[self.start + 1..self.current - 1].to_string();
         let token_kind = TokenKind::String;
         self.add_token(token_kind);
     }

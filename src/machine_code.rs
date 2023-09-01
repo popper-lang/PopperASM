@@ -103,7 +103,7 @@ impl MachineCodeInstruction {
         bytecode
     }
 
-    pub fn from_bytecode(bytecode: Vec<u8>) -> Self {
+    pub fn from_bytecode(_bytecode: Vec<u8>) -> Self {
         todo!()
     }
 }
