@@ -1,3 +1,4 @@
+use crate::MODE;
 use std::collections::HashMap;
 use std::fmt::{Binary, LowerHex};
 use crate::ast::*;
@@ -16,6 +17,7 @@ pub static POP: u8 = 0x16;
 pub static CALL: u8 = 0x17;
 pub static ALLOW: u8 = 0x18;
 pub static NOP: u8 = 0x19;
+pub static JUMP: u8 = 0x20;
 
 
 #[derive(Clone, Debug, PartialEq)]
@@ -41,34 +43,36 @@ impl MachineCodeInstruction {
     }
 
     pub fn binary_string(&self) -> String {
+        let space = if MODE.is_debug() { " " } else { "" };
         let instr_addr_bin = self.label
             .iter()
             .map(|x| add_zero(format!("{:b}", x), 8))
             .collect::<Vec<String>>()
-            .join(" ");
+            .join(space);
         let instr_bin = add_zero(format!("{:b}", self.instr), 7);
         let operand1_type_bin = add_zero(format!("{:b}", self.operand1_type), 4);
         let operand1_bin = self.operand1
             .iter()
             .map(|x| add_zero(format!("{:b}", x), 8))
             .collect::<Vec<String>>()
-            .join(" ");
+            .join(space);
         let operand2_type_bin = add_zero(format!("{:b}", self.operand2_type), 4);
         let operand2_bin = self.operand2
             .iter()
             .map(|x| add_zero(format!("{:b}", x), 8))
             .collect::<Vec<String>>()
-            .join(" ");
+            .join(space);
 
-        format!("{} {} {} {} {} {}", instr_addr_bin, instr_bin, operand1_type_bin, operand1_bin, operand2_type_bin, operand2_bin)
+        vec![instr_addr_bin, instr_bin, operand1_type_bin, operand1_bin, operand2_type_bin, operand2_bin].join(space)
     }
 
     pub fn hex_string(&self) -> String {
+        let space = if MODE.is_debug() { " " } else { "" };
         let instr_addr_mem_hex = self.label
             .iter()
             .map(|x| add_zero(format!("{:x}", x), 4))
             .collect::<Vec<String>>()
-            .join(" ");
+            .join(space);
         let instr_hex = add_zero(format!("{:x}", self.instr), 4);
         let operand1_type_hex = add_zero(format!("{:x}", self.operand1_type), 4);
 
@@ -76,15 +80,16 @@ impl MachineCodeInstruction {
             .iter()
             .map(|x| add_zero(format!("{:x}", x), 4))
             .collect::<Vec<String>>()
-            .join(" ");
+            .join(space);
         let operand2_type_hex = add_zero(format!("{:x}", self.operand2_type), 4);
 
         let operand2_hex = self.operand2
             .iter()
             .map(|x| add_zero(format!("{:x}", x), 4))
             .collect::<Vec<String>>()
-            .join(" ");
-        format!("{} {} {} {} {} {}", instr_addr_mem_hex, instr_hex, operand1_type_hex, operand1_hex, operand2_type_hex, operand2_hex)
+            .join(space);
+
+        vec![instr_addr_mem_hex, instr_hex, operand1_type_hex, operand1_hex, operand2_type_hex, operand2_hex].join(space)
     }
 
     pub fn to_bytecode(&self) -> Vec<u8> {
@@ -243,8 +248,10 @@ impl MachineCodeCompiler {
                     self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), POP, operand1_type, operand1, VOID, Default::default()));
                 },
                 Command::Call(call) => {
-                    let n = self.int_to_bytes(self.labels.get(&call.0).cloned().unwrap());
+                    let label = *self.labels.get(&call.0).unwrap();;
+                    let n = self.int_to_bytes(label);
                     self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), CALL, INT, n, VOID, Default::default()));
+                    self.current_label =  label;
                 },
                 Command::Allow(allow) => {
                     let (operand1_type, operand1) = self.expr_to_bytes(allow.0);
@@ -280,10 +287,11 @@ impl MachineCodeCompiler {
     pub fn expr_to_bytes(&self, expr: Expr) -> (u8, [u8; 4])  {
         match expr {
             Expr::Int(int) => (INT, self.int_to_bytes(int as u32)),
-            Expr::Label(label) => (LABEL, self.int_to_bytes(self.labels.get(&label).unwrap().clone())),
+            Expr::Label(label) => (LABEL, self.int_to_bytes(*self.labels.get(&label).unwrap())),
             Expr::Memory(mem) => self.memory_to_bytes(mem),
         }
     }
+
 
 }
 

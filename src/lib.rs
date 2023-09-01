@@ -6,6 +6,21 @@ pub mod parser;
 pub mod ast;
 pub mod machine_code;
 
+#[derive(PartialEq, Debug)]
+pub enum Mode { Debug, Release }
+
+impl Mode {
+    pub fn is_debug(&self) -> bool {
+        self == &Mode::Debug
+    }
+
+    pub fn is_release(&self) -> bool {
+        self == &Mode::Release
+    }
+
+}
+pub static MODE: Mode = Mode::Debug;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
