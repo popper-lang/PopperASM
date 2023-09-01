@@ -170,7 +170,6 @@ pub struct MachineCodeCompiler {
     pub program: Program,
     pub machine_code: MachineCode,
     labels: HashMap<String, u32>,
-    must_have: HashMap<String, u32>,
     current_label: u32,
 }
 
@@ -180,7 +179,6 @@ impl MachineCodeCompiler {
             program,
             machine_code: MachineCode::new(vec![]),
             labels: HashMap::new(),
-            must_have: HashMap::new(),
             current_label: 1,
         }
     }
@@ -248,7 +246,7 @@ impl MachineCodeCompiler {
                     self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), POP, operand1_type, operand1, VOID, Default::default()));
                 },
                 Command::Call(call) => {
-                    let label = *self.labels.get(&call.0).unwrap();;
+                    let label = *self.labels.get(&call.0).unwrap();
                     let n = self.int_to_bytes(label);
                     self.machine_code.push(MachineCodeInstruction::new(self.int_to_bytes(self.current_label), CALL, INT, n, VOID, Default::default()));
                     self.current_label =  label;
@@ -302,9 +300,6 @@ fn add_zero(string: String, size: usize) -> String {
     format!("{}{}", added_zeros, string)
 }
 
-fn sum_ascii_letter(string: String) -> u32 {
-    string.chars().fold(0, |acc, x| acc + x as u32)
-}
 
 #[cfg(test)]
 mod tests {

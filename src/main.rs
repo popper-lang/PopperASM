@@ -1,6 +1,6 @@
 use popper_asm::lexer::Lexer;
 use popper_asm::parser::Parser;
-use popper_asm::machine_code::{MachineCodeCompiler, MachineCodeInstruction};
+use popper_asm::machine_code::MachineCodeCompiler;
 use popper_asm::MODE;
 
 fn main() {
