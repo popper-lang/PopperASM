@@ -19,7 +19,7 @@ impl Mode {
     }
 
 }
-pub static MODE: Mode = Mode::Debug;
+pub static MODE: Mode = Mode::Release;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right
