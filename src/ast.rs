@@ -1,5 +1,3 @@
-
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum Command {
     Mov(Mov),
@@ -9,21 +7,21 @@ pub enum Command {
     Div(Div),
     Pop(Pop),
     Call(Call),
-    Allow(Allow)
+    Allow(Allow),
 }
 
 #[derive(Clone, Debug, PartialEq)]
 #[repr(u32)]
 pub enum Register {
-    R1  = 0x01,
-    R2  = 0x02,
-    R3  = 0x03,
-    R4  = 0x04,
-    R5  = 0x05,
-    R6  = 0x06,
-    R7  = 0x07,
-    R8  = 0x08,
-    R9  = 0x09,
+    R1 = 0x01,
+    R2 = 0x02,
+    R3 = 0x03,
+    R4 = 0x04,
+    R5 = 0x05,
+    R6 = 0x06,
+    R7 = 0x07,
+    R8 = 0x08,
+    R9 = 0x09,
     R10 = 0x0A,
     R11 = 0x0B,
     R12 = 0x0C,
@@ -52,7 +50,7 @@ impl From<u8> for Register {
             0b01110 => Register::R14,
             0b01111 => Register::R15,
             0b10000 => Register::Rbp,
-            _ => panic!("invalid register")
+            _ => panic!("invalid register"),
         }
     }
 }
@@ -90,7 +88,6 @@ impl Label {
     pub fn new(name: String, program: Vec<Command>) -> Self {
         Self { name, program }
     }
-
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -104,8 +101,6 @@ impl Program {
     }
 }
 
-
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expr {
     Int(i32),
@@ -113,9 +108,8 @@ pub enum Expr {
     Memory(MemoryFetching),
 }
 
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum MemoryFetching {
     Addr(usize),
-    Register(Register)
+    Register(Register),
 }

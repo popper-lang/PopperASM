@@ -1,13 +1,16 @@
 #![allow(non_snake_case)]
 
-pub mod lexer;
-pub mod span;
-pub mod parser;
 pub mod ast;
+pub mod lexer;
 pub mod machine_code;
+pub mod parser;
+pub mod span;
 
 #[derive(PartialEq, Debug)]
-pub enum Mode { Debug, Release }
+pub enum Mode {
+    Debug,
+    Release,
+}
 
 impl Mode {
     pub fn is_debug(&self) -> bool {
@@ -17,7 +20,6 @@ impl Mode {
     pub fn is_release(&self) -> bool {
         self == &Mode::Release
     }
-
 }
 pub static MODE: Mode = Mode::Release;
 

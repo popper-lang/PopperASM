@@ -1,6 +1,6 @@
 use popper_asm::lexer::Lexer;
-use popper_asm::parser::Parser;
 use popper_asm::machine_code::MachineCodeCompiler;
+use popper_asm::parser::Parser;
 use popper_asm::MODE;
 
 fn main() {
@@ -32,7 +32,7 @@ fn debug() {
 
             let m = machine_code_compiler.compile();
             println!("Binary:\n{:b}", m);
-        },
+        }
         Err(e) => {
             e.report(source);
         }
@@ -56,7 +56,7 @@ fn cli() {
             let m = machine_code_compiler.compile();
 
             std::fs::write(output, format!("{:b}", m)).expect("Unable to write file");
-        },
+        }
         Err(e) => {
             e.report(&content_input);
         }

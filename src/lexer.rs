@@ -11,19 +11,15 @@ pub enum TokenKind {
     Comma,
     Dollar,
     Eof,
-    Newline
+    Newline,
 }
-
-
-
 
 #[derive(Clone, Debug)]
 pub struct Token {
     pub token_kind: TokenKind,
     pub lexeme: String,
-    pub span: Span
+    pub span: Span,
 }
-
 
 #[derive(Clone)]
 pub struct Lexer<'a> {
@@ -31,7 +27,7 @@ pub struct Lexer<'a> {
     pub tokens: Vec<Token>,
     pub start: usize,
     pub current: usize,
-    pub line: usize
+    pub line: usize,
 }
 
 impl<'a> Lexer<'a> {
@@ -41,7 +37,7 @@ impl<'a> Lexer<'a> {
             tokens: vec![],
             start: 0,
             current: 0,
-            line: 1
+            line: 1,
         }
     }
 
@@ -64,9 +60,9 @@ impl<'a> Lexer<'a> {
             'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
             '\n' => {
                 self.line += 1;
-            },
+            }
             ' ' | '\r' | '\t' => (),
-            e => panic!("Unexpected character: {}", e)
+            e => panic!("Unexpected character: {}", e),
         }
     }
 
@@ -115,7 +111,11 @@ impl<'a> Lexer<'a> {
     fn add_token(&mut self, token_kind: TokenKind) {
         let lexeme = self.source[self.start..self.current].to_string();
         let span = Span::new(self.start, self.current);
-        self.tokens.push(Token { token_kind, lexeme, span });
+        self.tokens.push(Token {
+            token_kind,
+            lexeme,
+            span,
+        });
     }
 
     fn advance(&mut self) -> char {
@@ -248,6 +248,5 @@ mod tests {
         assert_eq!(tokens[3].span.extract_from_str(source), "#");
         assert_eq!(tokens[4].span.extract_from_str(source), ",");
         assert_eq!(tokens[5].span.extract_from_str(source), "\"hello\"");
-
     }
 }

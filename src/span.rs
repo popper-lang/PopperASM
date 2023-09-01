@@ -4,7 +4,7 @@ use std::ops::Range;
 #[derive(Copy, Clone, PartialEq)]
 pub struct Span {
     start: usize,
-    end: usize
+    end: usize,
 }
 
 impl Debug for Span {
@@ -17,17 +17,14 @@ impl From<Range<usize>> for Span {
     fn from(value: Range<usize>) -> Self {
         Self {
             start: value.start,
-            end: value.end
+            end: value.end,
         }
     }
 }
 
 impl Span {
     pub fn new(start: usize, end: usize) -> Self {
-        Self {
-            start,
-            end
-        }
+        Self { start, end }
     }
     pub fn extract_from_str<'a>(&self, string: &'a str) -> &'a str {
         &string[self.start..self.end]
