@@ -21,19 +21,21 @@ impl Mode {
         self == &Mode::Release
     }
 }
+
 pub static MODE: Mode = Mode::Release;
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+pub fn compile_file_into_file(file_name: &str, output_file_name: &str) {
+    let body = std::fs::read_to_string(file_name).unwrap();
+    let binary = compile_string(body.as_str());
+    std::fs::write(output_file_name, binary).unwrap();
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn compile_string(string: &str) -> String {
+    let mut lexer = lexer::Lexer::new(string);
+    lexer.scan_tokens();
+    let mut parser = parser::Parser::new(lexer.get_tokens());
+    let out = parser.parse().unwrap();
+    let mut machine_code_compiler = machine_code::MachineCodeCompiler::new(out);
+    let m = machine_code_compiler.compile();
+    format!("{:b}", m)
 }

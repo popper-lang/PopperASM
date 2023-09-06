@@ -15,12 +15,10 @@ fn debug() {
     let source = r#"
 
     main:
-        mov r1, 2
+        mov r1, 7
         mov r2, 3
-        mov r4, 5
-        call $sum
-    sum:
-        add r1, r4
+        mov r3, 5
+        add r1, r2
     "#;
 
     let mut lexer = Lexer::new(source);

@@ -1,6 +1,5 @@
 main:
-	mov r1, 1
-	mov r2, 2
-	call $sum
-sum:
-	add r1, r2
+        mov r1, 7
+        mov r2, 3
+        mov r3, 5
+        add r1, r2

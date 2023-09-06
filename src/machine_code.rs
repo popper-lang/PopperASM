@@ -215,7 +215,7 @@ impl MachineCodeCompiler {
         self.setup_labels(self.program.labels.clone());
         self.labels_compiler(self.program.labels.clone());
         self.machine_code.push(MachineCodeInstruction::new(
-            self.int_to_bytes(0),
+            self.int_to_bytes(1),
             NOP,
             VOID,
             Default::default(),
