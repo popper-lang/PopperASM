@@ -8,6 +8,7 @@ pub enum Command {
     Pop(Pop),
     Call(Call),
     Allow(Allow),
+    Ret(Ret)
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -77,6 +78,9 @@ pub struct Call(pub String);
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Allow(pub Expr, pub Expr);
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Ret;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Label {

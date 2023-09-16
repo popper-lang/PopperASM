@@ -6,8 +6,8 @@ use std::fmt::{Binary, LowerHex};
 pub static VOID: u8 = 0x0;
 pub static REG: u8 = 0x1;
 pub static INT: u8 = 0x2;
-pub static MEM: u8 = 0x3;
-pub static LABEL: u8 = 0x4;
+pub static LABEL: u8 = 0x3;
+pub static MEM: u8 = 0x4;
 pub static MOV: u8 = 0x11;
 pub static ADD: u8 = 0x12;
 pub static SUB: u8 = 0x13;
@@ -18,6 +18,8 @@ pub static CALL: u8 = 0x17;
 pub static ALLOW: u8 = 0x18;
 pub static NOP: u8 = 0x19;
 pub static JUMP: u8 = 0x20;
+pub static RET: u8 = 0x21;
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MachineCodeInstruction {
@@ -341,6 +343,16 @@ impl MachineCodeCompiler {
                         operand1,
                         operand2_type,
                         operand2,
+                    ));
+                }
+                Command::Ret(_) => {
+                    self.machine_code.push(MachineCodeInstruction::new(
+                        self.int_to_bytes(self.current_label),
+                        RET,
+                        VOID,
+                        Default::default(),
+                        VOID,
+                        Default::default(),
                     ));
                 }
             }
