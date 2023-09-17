@@ -120,16 +120,16 @@ impl Expr {
         }
     }
 
-    pub fn expect_label(&self) -> &String {
+    pub fn expect_label(&self) -> String {
         match self {
-            Self::Label(label) => label,
+            Self::Label(label) => label.clone(),
             e => panic!("Expected label, found {:?}", e),
         }
     }
 
-    pub fn expect_memory(&self) -> &MemoryFetching {
+    pub fn expect_memory(&self) -> MemoryFetching {
         match self {
-            Self::Memory(memory) => memory,
+            Self::Memory(memory) => memory.clone(),
             e => panic!("Expected memory, found {:?}", e),
         }
     }
