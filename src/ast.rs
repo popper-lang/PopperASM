@@ -112,6 +112,29 @@ pub enum Expr {
     Memory(MemoryFetching),
 }
 
+impl Expr {
+    pub fn expect_int(&self) -> i32 {
+        match self {
+            Self::Int(int) => *int,
+            e => panic!("Expected int, found {:?}", e),
+        }
+    }
+
+    pub fn expect_label(&self) -> &String {
+        match self {
+            Self::Label(label) => label,
+            e => panic!("Expected label, found {:?}", e),
+        }
+    }
+
+    pub fn expect_memory(&self) -> &MemoryFetching {
+        match self {
+            Self::Memory(memory) => memory,
+            e => panic!("Expected memory, found {:?}", e),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum MemoryFetching {
     Addr(usize),
