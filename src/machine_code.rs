@@ -325,7 +325,7 @@ impl MachineCodeCompiler {
                     self.machine_code.push(MachineCodeInstruction::new(
                         self.int_to_bytes(self.current_label),
                         CALL,
-                        INT,
+                        LABEL,
                         n,
                         VOID,
                         Default::default(),
